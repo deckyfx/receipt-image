@@ -1,0 +1,5 @@
+[serve.static]
+plugins = ["bun-plugin-tailwind"]
+
+# Make all BUN_PUBLIC_* environment variables available to client-side code via process.env.BUN_PUBLIC_MY_VAR
+env = "BUN_PUBLIC_*"
