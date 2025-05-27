@@ -1,24 +1,21 @@
-type Props = {
-  images: string[];
-  setImages: (images: string[]) => void;
-  width: number;
-};
+import { useEditorStore } from "@react/store/useEditorStore";
 
-export default function PreviewPanel({ images, setImages, width }: Props) {
+export default function PreviewPanel() {
+  const { images, removeImage, width } = useEditorStore();
+
   return (
-    <div style={{ width }} className="p-4 overflow-y-auto border-l">
+    <div
+      style={{ width }}
+      className="p-0 overflow-y-auto border-l border border-red-300 rounded"
+    >
       {images.map((img, idx) => (
-        <div
+        <img
           key={idx}
-          className="relative"
-          onClick={() => setImages(images.filter((_, i) => i !== idx))}
-        >
-          <img
-            src={`data:image/png;base64,${img}`}
-            alt={`Preview ${idx}`}
-            className="w-full rounded shadow"
-          />
-        </div>
+          src={`data:image/png;base64,${img}`}
+          className="w-full cursor-pointer"
+          alt={`Generated preview ${idx + 1}`}
+          onClick={() => removeImage(idx)}
+        />
       ))}
     </div>
   );

@@ -1,71 +1,50 @@
-// src/ControlPanel.tsx
-import React, { useRef } from 'react';
+import DropdownSelector from "./DropdownSelector";
+import SliderSelector from "./SliderSelector";
 
-type ControlPanelProps = {
-  selected: string;
-  setSelected: (type: string) => void;
-  formOptions: Record<string, React.ForwardRefExoticComponent<any>>;
-  handleAdd: (data: any) => void;
-  width: number;
-  setWidth: (width: number) => void;
+import HeadingForm from "./HeadingForm";
+import TextForm from "./TextForm";
+import { DividerForm } from "./DividerForm";
+import ImageForm from "./ImageForm";
+import ColumnsForm from "./ColumnsForm";
+
+import type { ComponentType } from "@src/types";
+import { useEditorStore } from "@react/store/useEditorStore";
+
+const formMap: Record<ComponentType, any> = {
+  heading: HeadingForm,
+  text: TextForm,
+  divider: DividerForm,
+  image: ImageForm,
+  columns: ColumnsForm,
 };
 
-export default function ControlPanel({
-  selected,
-  setSelected,
-  formOptions,
-  handleAdd,
-  width,
-  setWidth,
-}: ControlPanelProps) {
-  const formRef = useRef<any>(null);
+export default function ControlPanel() {
+  const { selected, setSelected, width, setWidth } = useEditorStore();
 
-  const FormComponent = selected ? formOptions[selected] : null;
+  const SelectedForm = selected ? formMap[selected] : null;
 
   return (
-    <div className="flex flex-col w-full p-4 space-y-6 bg-gray-50 border-r border-gray-300">
-      {/* Selection */}
-      <div>
-        <label className="block mb-1 font-semibold">Add Element</label>
-        <select
-          value={selected}
-          onChange={(e) => setSelected(e.target.value)}
-          className="w-full p-2 border rounded"
-        >
-          <option value="">Select...</option>
-          {Object.keys(formOptions).map((key) => (
-            <option key={key} value={key}>
-              Add {key.charAt(0).toUpperCase() + key.slice(1)}
-            </option>
-          ))}
-        </select>
-      </div>
+    <div className="w-120 border-r p-4 space-y-4 overflow-y-auto">
+      <SliderSelector
+        value={width}
+        onChange={(v) => setWidth(v)}
+        min={100}
+        max={800}
+        step={10}
+        title="Receipt Width"
+        name="width"
+        unit="px"
+      />
 
-      {/* Width Slider */}
-      <div>
-        <label className="block mb-1 font-semibold">Preview Width: {width}px</label>
-        <input
-          type="range"
-          min={100}
-          max={600}
-          value={width}
-          onChange={(e) => setWidth(parseInt(e.target.value))}
-          className="w-full"
-        />
-      </div>
+      <DropdownSelector
+        title="Element Type"
+        onChange={(v) => setSelected(v as ComponentType)}
+        name="elementtype"
+        selections={["heading", "text", "divider", "columns", "image"]}
+        value={selected || ""}
+      />
 
-      {/* Dynamic Form */}
-      <div className="flex-grow overflow-auto">
-        {FormComponent ? (
-          <FormComponent 
-            ref={formRef} 
-            onAdd={() => {
-              if (!formRef.current) return;
-              const data = formRef.current.getData();
-              handleAdd(data);
-            }} 
-          />) : <div>Select an element to add.</div>}
-      </div>
+      {SelectedForm && <SelectedForm />}
     </div>
   );
 }

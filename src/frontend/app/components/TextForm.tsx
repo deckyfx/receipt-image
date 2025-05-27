@@ -1,108 +1,95 @@
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
-import { AlignmentSelector } from './AlignmentSelector';
-import { FieldBox } from './FieldBox';
+import { useState } from "react";
 
-type TextData = {
-  text?: string;
-  align?: 'left' | 'center' | 'right';
-  thickness?: 'normal' | 'bolder' | 'lighter';
-  italic?: boolean;
-  underline?: boolean;
-};
+import AlignmentSelector from "./AlignmentSelector";
+import FieldBox from "./FieldBox";
+import AddButton from "./AddButton";
+import RadioSelector from "./RadioSelector";
+import CheckboxGroup from "./CheckboxGroup";
+import TextInput from "./TextInput";
+import { useEditorStore } from "@react/store/useEditorStore";
+import type { Alignment, PayloadByType } from "@src/types";
 
-type Props = {
-  onAdd?: () => void;
-};
+export default function TextForm() {
+  const { addComponent } = useEditorStore();
 
-export const TextForm = forwardRef(({ onAdd }: Props, ref) => {
-  const [data, setData] = useState<TextData>({
-    text: '',
-    align: 'left',
-    thickness: 'normal',
+  const [data, setData] = useState<PayloadByType<"text">>({
+    text: "",
+    align: "left",
+    size: "base",
+    thickness: "normal",
     italic: false,
     underline: false,
   });
 
+  const styleKeys = Object.keys(data).filter(
+    (key) => typeof data[key as keyof typeof data] === "boolean"
+  ) as (keyof typeof data)[];
+
   const canAdd = !data.text ? false : data.text.trim().length > 0;
 
+  function onAdd() {
+    addComponent({
+      type: "text",
+      data,
+    });
+  }
 
-  useImperativeHandle(ref, () => ({
-    getData: () => data,
-  }));
+  function handleStyleChange(change: Partial<Record<string, boolean>>) {
+    setData((prev) => ({
+      ...prev,
+      ...change,
+    }));
+  }
 
   return (
     <div className="space-y-4">
-      <FieldBox label="Text Content">
-        <input
-          type="text"
-          placeholder="Enter text"
-          value={data.text || ''}
-          onChange={(e) => setData({ ...data, text: e.target.value })}
-          className="w-full p-2 border rounded"
-        />
-      </FieldBox>
-
-      <FieldBox label="Alignment">
-        <AlignmentSelector
-          align={data.align || 'left'}
-          onChange={(align) => {
-            setData({ 
-              ...data, 
-              align: align as 'left' | 'center' | 'right'
-            })
-          }}
-        />
-      </FieldBox>
-
-      <FieldBox label="Thickness">
-        <div className="flex space-x-4">
-          {['normal', 'bolder', 'lighter'].map((t) => (
-            <label key={t} className="flex items-center space-x-1">
-              <input
-                type="radio"
-                name="thickness"
-                value={t}
-                checked={data.thickness === t}
-                onChange={() => setData({ ...data, thickness: t as TextData['thickness'] })}
-              />
-              <span className="capitalize text-sm">{t}</span>
-            </label>
-          ))}
-        </div>
-      </FieldBox>
-
-      <FieldBox label="Styles">
-        <div className="flex space-x-4">
-          <label className="flex items-center space-x-1">
-            <input
-              type="checkbox"
-              checked={data.italic}
-              onChange={(e) => setData({ ...data, italic: e.target.checked })}
-            />
-            <span className="text-sm">Italic</span>
-          </label>
-          <label className="flex items-center space-x-1">
-            <input
-              type="checkbox"
-              checked={data.underline}
-              onChange={(e) => setData({ ...data, underline: e.target.checked })}
-            />
-            <span className="text-sm">Underline</span>
-          </label>
-        </div>
-      </FieldBox>
-
-      
-
-      <button
-        onClick={onAdd}
-        disabled={!canAdd}
-        className={`mt-4 px-4 py-2 rounded ${
-            canAdd ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer text-white' : 'bg-gray-400 cursor-not-allowed text-gray-700'
-          }`}
-        >
-        Add
-      </button>
+      <TextInput
+        title="Text Content"
+        name="text"
+        value={data.text}
+        placeholder="Text Content"
+        onChange={(text) => setData({ ...data, text })}
+      />
+      <AlignmentSelector
+        value={data.align || "left"}
+        onChange={(align) => {
+          setData({
+            ...data,
+            align: align as Alignment,
+          });
+        }}
+      />
+      <RadioSelector
+        title="Size"
+        onChange={(v) => {
+          setData({
+            ...data,
+            size: v,
+          });
+        }}
+        name="size"
+        selections={["xs", "sm", "base", "lg", "xl"]}
+        value={data.size}
+      />
+      <RadioSelector
+        title="Thickness"
+        onChange={(v) => {
+          setData({
+            ...data,
+            thickness: v,
+          });
+        }}
+        name="thickness"
+        selections={["normal", "bolder", "lighter"]}
+        value={data.thickness}
+      />
+      <CheckboxGroup
+        selections={styleKeys as string[]}
+        data={data as Record<string, boolean>} // Type assertion because data contains more than booleans, but we only read booleans here
+        onChange={handleStyleChange}
+        title="Styles"
+      />
+      <AddButton component="text" onAdd={onAdd} disabled={!canAdd} />
     </div>
   );
-});
+}

@@ -1,80 +1,63 @@
-import React, { forwardRef, useImperativeHandle, useState } from "react";
-import { AlignmentSelector } from "./AlignmentSelector";
-import { FieldBox } from "./FieldBox";
+import { useState } from "react";
 
-type HeadingData = {
-  text?: string;
-  size?: string;
-  align?: "left" | "center" | "right";
-};
+import AlignmentSelector from "./AlignmentSelector";
+import SliderSelector from "./SliderSelector";
+import TextInput from "./TextInput";
+import AddButton from "./AddButton";
+import { useEditorStore } from "@react/store/useEditorStore";
+import type { Alignment, PayloadByType } from "@src/types";
 
-type Props = {
-  onAdd?: () => void;
-};
+export default function HeadingForm() {
+  const { addComponent } = useEditorStore();
 
-export const HeadingForm = forwardRef(({ onAdd }: Props, ref) => {
-  const [data, setData] = useState<HeadingData>({
+  const [data, setData] = useState<PayloadByType<"heading">>({
     text: "",
-    size: "h1",
+    size: 1,
     align: "left",
   });
 
-  useImperativeHandle(ref, () => ({
-    getData: () => data,
-  }));
-
-  const sliderValue = 7 - parseInt(data.size?.slice(1) || "1");
+  function onAdd() {
+    addComponent({
+      type: "heading",
+      data,
+    });
+  }
 
   const canAdd = !data.text ? false : data.text.trim().length > 0;
 
   return (
     <div className="space-y-4">
-      <FieldBox label="Heading Text">
-        <input
-          type="text"
-          placeholder="Heading Text"
-          value={data.text || ""}
-          onChange={(e) => setData({ ...data, text: e.target.value })}
-          className="w-full p-2 border rounded"
-        />
-      </FieldBox>
+      <TextInput
+        title="Heading Text"
+        name="headingText"
+        value={data.text}
+        placeholder="Heading Text"
+        onChange={(text) => setData({ ...data, text })}
+      />
 
-      <FieldBox label="Size (H1 - H6)">
-        <input
-          type="range"
-          min={1}
-          max={6}
-          value={sliderValue}
-          onChange={(e) =>
-            setData({ ...data, size: `h${7 - parseInt(e.target.value)}` })
-          }
-          className="w-full"
-        />
-        <div className="text-xs mt-1 text-gray-600">
-          {data.size?.toUpperCase() || "H1"}
-        </div>
-      </FieldBox>
+      <SliderSelector
+        value={data.size || 1}
+        onChange={(v) => setData({ ...data, size: v })}
+        min={1}
+        max={6}
+        step={1}
+        reverse
+        title="Size (H1 - H6)"
+        name="size"
+        unit="H"
+      />
 
-      <FieldBox label="Alignment">
-        <AlignmentSelector
-          align={data.align || "left"}
-          onChange={(align) =>
-            setData({ ...data, align: align as "left" | "center" | "right" })
-          }
-        />
-      </FieldBox>
+      <AlignmentSelector
+        value={data.align}
+        onChange={(align) =>
+          setData({
+            ...data,
+            align: align as Alignment,
+          })
+        }
+      />
 
-      <button
-        onClick={onAdd}
-        disabled={!canAdd}
-        className={`mt-4 px-4 py-2 rounded ${
-          canAdd
-            ? "bg-blue-600 hover:bg-blue-700 cursor-pointer text-white"
-            : "bg-gray-400 cursor-not-allowed text-gray-700"
-        }`}
-      >
-        Add
-      </button>
+      <AddButton component="heading" onAdd={onAdd} disabled={!canAdd} />
     </div>
   );
-});
+}

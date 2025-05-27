@@ -2,23 +2,18 @@ import puppeteer from "puppeteer";
 
 import { ReceiptBuilder } from "./ReceiptBuilder";
 
-type RequestPayload = {
-  type: "heading" | "text";
-  data: {
-    text: string;
-    size: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-    align: "left" | "right" | "center";
-    thickness: "normal" | "bolder" | "lighter";
-    italic: boolean;
-    underline: boolean;
-  };
+import type { ComponentType, PayloadByType } from "./types";
+
+type RequestPayload<T extends ComponentType> = {
+  type: string;
+  data: PayloadByType<T>;
   width: number;
 };
 
 async function Generate(
   req: Bun.BunRequest<"/api/generate">
 ): Promise<Response> {
-  const body = (await req.json()) as RequestPayload;
+  const body = (await req.json()) as RequestPayload<"text">;
 
   const browser = await puppeteer.launch({});
   const page = await browser.newPage();
@@ -31,20 +26,35 @@ async function Generate(
   let html = "";
 
   switch (body.type) {
-    case "text":
-      receipt.addText(body.data.text, {
-        align: body.data.align,
-        italic: body.data.italic,
-        underline: body.data.underline,
-        thickness: body.data.thickness,
-      });
+    case "text": {
+      const { text, ...payload } = body.data as PayloadByType<"text">;
+      receipt.addText(text || "", payload);
       break;
-    case "heading":
-      const size = body.data.size.replace(/\w/, "");
-      receipt.addHeading(body.data.text, Number(size), body.data.align);
+    }
+    case "heading": {
+      const { text, ...payload } = body.data as PayloadByType<"heading">;
+      const size = body.data.size;
+      receipt.addHeading(text || "", payload);
       break;
+    }
+    case "divider": {
+      const payload = body.data as PayloadByType<"divider">;
+      receipt.addDivider(payload);
+      break;
+    }
+    case "image": {
+      const { src, width, align } = body.data as PayloadByType<"image">;
+      receipt.addImage(src, width, align);
+      break;
+    }
+    case "columns": {
+      const payload = body.data as PayloadByType<"columns">;
+      receipt.addColumns(payload);
+      break;
+    }
   }
   html = receipt.build();
+  console.log(html);
 
   await page.setContent(html);
 
