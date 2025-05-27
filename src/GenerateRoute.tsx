@@ -1,5 +1,9 @@
 import puppeteer from "puppeteer";
 
+import qrcode from "qrcode";
+import JsBarcode from "jsbarcode";
+import { DOMImplementation, XMLSerializer } from "xmldom";
+
 import { ReceiptBuilder } from "./ReceiptBuilder";
 
 import type { ComponentType, PayloadByType } from "./types";
@@ -42,19 +46,53 @@ async function Generate(
       receipt.addDivider(payload);
       break;
     }
-    case "image": {
-      const { src, width, align } = body.data as PayloadByType<"image">;
-      receipt.addImage(src, width, align);
-      break;
-    }
     case "columns": {
       const payload = body.data as PayloadByType<"columns">;
       receipt.addColumns(payload);
       break;
     }
+    case "image": {
+      const { src, width, align } = body.data as PayloadByType<"image">;
+      receipt.addImage(src, width, align);
+      break;
+    }
+    case "qrcode": {
+      const { content, width, align } = body.data as PayloadByType<"qrcode">;
+
+      try {
+        const qrdata = await qrcode.toDataURL(content);
+        receipt.addImage(qrdata, width, align);
+      } catch (error: any) {
+        console.warn(error);
+      }
+
+      break;
+    }
+    case "barcode": {
+      const { content, width, height, align } =
+        body.data as PayloadByType<"barcode">;
+
+      const xmlSerializer = new XMLSerializer();
+      const document = new DOMImplementation().createDocument(
+        "http://www.w3.org/1999/xhtml",
+        "html",
+        null
+      );
+      const svgNode = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "svg"
+      );
+
+      JsBarcode(svgNode, content, {
+        xmlDocument: document,
+      });
+
+      const svgText = xmlSerializer.serializeToString(svgNode);
+      receipt.addSVG(svgText, width, align);
+      break;
+    }
   }
   html = receipt.build();
-  console.log(html);
 
   await page.setContent(html);
 

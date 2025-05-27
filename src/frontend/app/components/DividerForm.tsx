@@ -1,23 +1,29 @@
 import { useState } from "react";
 
-import FieldBox from "./FieldBox";
 import AddButton from "./AddButton";
 import RadioSelector from "./RadioSelector";
 import { useEditorStore } from "@react/store/useEditorStore";
-import type { DividerStyle, DividerThickness, PayloadByType } from "@src/types";
+import type { PayloadByType } from "@src/types";
+
+const DefaultForm: PayloadByType<"divider"> = {
+  thickness: "thin",
+  style: "solid",
+};
 
 export function DividerForm() {
   const { addComponent } = useEditorStore();
 
   const [data, setData] = useState<PayloadByType<"divider">>({
-    thickness: "thin",
-    style: "solid",
+    ...DefaultForm,
   });
 
   const onAdd = () => {
     addComponent({
       type: "divider",
       data,
+    });
+    setData({
+      ...DefaultForm,
     });
   };
 

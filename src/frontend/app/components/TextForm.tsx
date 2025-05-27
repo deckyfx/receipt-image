@@ -1,24 +1,27 @@
 import { useState } from "react";
 
 import AlignmentSelector from "./AlignmentSelector";
-import FieldBox from "./FieldBox";
 import AddButton from "./AddButton";
 import RadioSelector from "./RadioSelector";
 import CheckboxGroup from "./CheckboxGroup";
 import TextInput from "./TextInput";
 import { useEditorStore } from "@react/store/useEditorStore";
-import type { Alignment, PayloadByType } from "@src/types";
+import type { Alignment, PayloadByType, TextStyle } from "@src/types";
+
+const DefaultForm: PayloadByType<"text"> = {
+  text: "",
+  align: "left",
+  size: "base",
+  thickness: "normal",
+  italic: false,
+  underline: false,
+};
 
 export default function TextForm() {
   const { addComponent } = useEditorStore();
 
   const [data, setData] = useState<PayloadByType<"text">>({
-    text: "",
-    align: "left",
-    size: "base",
-    thickness: "normal",
-    italic: false,
-    underline: false,
+    ...DefaultForm,
   });
 
   const styleKeys = Object.keys(data).filter(
@@ -32,9 +35,12 @@ export default function TextForm() {
       type: "text",
       data,
     });
+    setData({
+      ...DefaultForm,
+    });
   }
 
-  function handleStyleChange(change: Partial<Record<string, boolean>>) {
+  function handleStyleChange(change: TextStyle) {
     setData((prev) => ({
       ...prev,
       ...change,
@@ -50,6 +56,7 @@ export default function TextForm() {
         placeholder="Text Content"
         onChange={(text) => setData({ ...data, text })}
       />
+
       <AlignmentSelector
         value={data.align || "left"}
         onChange={(align) => {
@@ -59,6 +66,7 @@ export default function TextForm() {
           });
         }}
       />
+
       <RadioSelector
         title="Size"
         onChange={(v) => {
@@ -71,6 +79,7 @@ export default function TextForm() {
         selections={["xs", "sm", "base", "lg", "xl"]}
         value={data.size}
       />
+
       <RadioSelector
         title="Thickness"
         onChange={(v) => {
@@ -83,12 +92,14 @@ export default function TextForm() {
         selections={["normal", "bolder", "lighter"]}
         value={data.thickness}
       />
+
       <CheckboxGroup
         selections={styleKeys as string[]}
-        data={data as Record<string, boolean>} // Type assertion because data contains more than booleans, but we only read booleans here
+        data={data as TextStyle} // Type assertion because data contains more than booleans, but we only read booleans here
         onChange={handleStyleChange}
         title="Styles"
       />
+
       <AddButton component="text" onAdd={onAdd} disabled={!canAdd} />
     </div>
   );

@@ -4,8 +4,10 @@ import SliderSelector from "./SliderSelector";
 import HeadingForm from "./HeadingForm";
 import TextForm from "./TextForm";
 import { DividerForm } from "./DividerForm";
-import ImageForm from "./ImageForm";
 import ColumnsForm from "./ColumnsForm";
+import ImageForm from "./ImageForm";
+import QRCodeForm from "./QRCodeForm";
+import BarCodeForm from "./BarCodeForm";
 
 import type { ComponentType } from "@src/types";
 import { useEditorStore } from "@react/store/useEditorStore";
@@ -14,8 +16,10 @@ const formMap: Record<ComponentType, any> = {
   heading: HeadingForm,
   text: TextForm,
   divider: DividerForm,
-  image: ImageForm,
   columns: ColumnsForm,
+  image: ImageForm,
+  qrcode: QRCodeForm,
+  barcode: BarCodeForm,
 };
 
 export default function ControlPanel() {
@@ -40,7 +44,15 @@ export default function ControlPanel() {
         title="Element Type"
         onChange={(v) => setSelected(v as ComponentType)}
         name="elementtype"
-        selections={["heading", "text", "divider", "columns", "image"]}
+        selections={[
+          "heading",
+          "text",
+          "divider",
+          "columns",
+          "image",
+          "qrcode",
+          "barcode",
+        ]}
         value={selected || ""}
       />
 

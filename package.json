@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun run --hot ./src/server.ts"
+    "dev": "bun run --hot ./src/index.ts"
   },
   "engines": {
     "bun": ">= 1.2.14"
@@ -12,17 +12,22 @@
   "engineStrict": true,
   "dependencies": {
     "bun-plugin-tailwind": "^0.0.15",
+    "jsbarcode": "^3.11.6",
     "puppeteer": "^24.9.0",
     "puppeteer-core": "^24.9.0",
+    "qrcode": "^1.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.7",
+    "xmldom": "^0.6.0",
     "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^19.1.5",
-    "@types/react-dom": "^19.1.5"
+    "@types/react-dom": "^19.1.5",
+    "@types/xmldom": "^0.1.34"
   },
   "peerDependencies": {
     "typescript": "^5"

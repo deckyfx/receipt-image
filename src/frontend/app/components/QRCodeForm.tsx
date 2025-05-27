@@ -6,35 +6,25 @@ import TextInput from "./TextInput";
 import AddButton from "./AddButton";
 import type { Alignment, PayloadByType } from "@src/types";
 
-const DefaultColumn: PayloadByType<"image"> = {
-  src: "",
+const DefaultColumn: PayloadByType<"qrcode"> = {
+  content: "",
   width: 100,
   align: "left",
 };
 
-function isValidUrl(url: string) {
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === "http:" || parsed.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-export default function ImageForm() {
+export default function QRCodeForm() {
   const { addComponent } = useEditorStore();
 
-  const [data, setData] = useState<PayloadByType<"image">>({
+  const [data, setData] = useState<PayloadByType<"qrcode">>({
     ...DefaultColumn,
   });
 
-  const isUrlValid = isValidUrl(data.src);
-  const canAdd = data.src.trim().length > 0 && isUrlValid;
+  const canAdd = data.content.trim().length > 0;
 
   function onAdd() {
     if (!canAdd) return;
     addComponent({
-      type: "image",
+      type: "qrcode",
       data,
     });
     setData({
@@ -45,15 +35,12 @@ export default function ImageForm() {
   return (
     <div className="space-y-4">
       <TextInput
-        title="Image Source URL"
+        title="QRCode Data"
         name="src"
-        value={data.src}
-        placeholder="Enter image URL"
-        onChange={(src) => setData({ ...data, src })}
+        value={data.content}
+        placeholder="Enter QRCode Data"
+        onChange={(content) => setData({ ...data, content })}
       />
-      {!isUrlValid && data.src.trim() !== "" && (
-        <div className="text-sm text-red-600">Please enter a valid URL.</div>
-      )}
 
       <SliderSelector
         value={data.width || 100}
@@ -71,7 +58,7 @@ export default function ImageForm() {
         onChange={(align) => setData({ ...data, align: align as Alignment })}
       />
 
-      <AddButton component="image" onAdd={onAdd} disabled={!canAdd} />
+      <AddButton component="qrcode" onAdd={onAdd} disabled={!canAdd} />
     </div>
   );
 }

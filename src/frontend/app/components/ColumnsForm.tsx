@@ -3,24 +3,36 @@ import TextInput from "./TextInput";
 import AlignmentSelector from "./AlignmentSelector";
 import AddButton from "./AddButton";
 import NumberInput from "./NumberInput";
+import CheckboxGroup from "./CheckboxGroup";
+import RadioSelector from "./RadioSelector";
 
 import { useEditorStore } from "@react/store/useEditorStore";
-import type { ColumnPayload } from "@src/types";
+import type { ColumnPayload, TextPayload, TextStyle } from "@src/types";
 
 const COLUMNS_MIN = 2;
 const COLUMNS_MAX = 3;
+
+const DefaultColumn: ColumnPayload = {
+  text: "",
+  width: undefined,
+  align: "left",
+  size: "base",
+  thickness: "normal",
+  italic: false,
+  underline: false,
+};
 
 export default function ColumnsForm() {
   const { addComponent } = useEditorStore();
 
   const [columns, setColumns] = useState<ColumnPayload[]>([
-    { text: "", width: undefined, align: "left" },
-    { text: "", width: undefined, align: "left" },
+    { ...DefaultColumn },
+    { ...DefaultColumn },
   ]);
 
   function addColumn() {
     if (columns.length >= COLUMNS_MAX) return;
-    setColumns([...columns, { text: "", width: undefined, align: "left" }]);
+    setColumns([...columns, { ...DefaultColumn }]);
   }
 
   // Remove a column (min 2 columns)
@@ -36,6 +48,30 @@ export default function ColumnsForm() {
     setColumns(newColumns);
   }
 
+  function getColumnStyle(index: number) {
+    return columns[index] as TextStyle;
+  }
+
+  function getColumnStyleKeys(index: number): string[] {
+    const data = getColumnStyle(index);
+    if (!data) {
+      return [];
+    }
+    return Object.keys(data).filter(
+      (key) => typeof data[key as keyof typeof data] === "boolean"
+    ) as (keyof typeof data)[];
+  }
+
+  function handleStyleChange(index: number, changes: TextStyle) {
+    Object.keys(changes).forEach((key) => {
+      updateColumn(
+        index,
+        key as keyof TextStyle,
+        changes[key as keyof TextStyle]
+      );
+    });
+  }
+
   // Validate content (at least one non-empty)
   const canAdd = columns.some((c) => (c.text || "").trim().length > 0);
 
@@ -46,60 +82,91 @@ export default function ColumnsForm() {
       data: columns,
     });
     // reset form
-    setColumns([
-      { text: "", width: undefined, align: "left" },
-      { text: "", width: undefined, align: "left" },
-    ]);
+    setColumns([{ ...DefaultColumn }, { ...DefaultColumn }]);
   }
 
   return (
     <div className="space-y-6">
-      {columns.map((col, i) => (
-        <div key={i} className="border p-4 rounded space-y-3 relative">
-          <div className="absolute top-2 right-2">
-            {columns.length > COLUMNS_MIN && (
-              <button
-                type="button"
-                onClick={() => removeColumn(i)}
-                className="text-red-600 hover:text-red-800"
-                aria-label={`Remove column ${i + 1}`}
-              >
-                &times;
-              </button>
-            )}
+      {columns.map((col, i) => {
+        return (
+          <div key={i} className="border p-4 rounded space-y-3 relative">
+            <div className="absolute top-2 right-2">
+              {columns.length > COLUMNS_MIN && (
+                <button
+                  type="button"
+                  onClick={() => removeColumn(i)}
+                  className="text-red-600 hover:text-red-800"
+                  aria-label={`Remove column ${i + 1}`}
+                >
+                  &times;
+                </button>
+              )}
+            </div>
+
+            <TextInput
+              title={`Column ${i + 1} Content`}
+              name={`content-${i}`}
+              value={col.text}
+              placeholder="Column text content"
+              onChange={(content) => updateColumn(i, "text", content)}
+            />
+
+            <NumberInput
+              title={`Column ${i + 1} Width (optional)`}
+              name={`width-${i}`}
+              value={col.width}
+              placeholder="Flexible if empty"
+              min={1}
+              max={100}
+              onChange={(v) => {
+                updateColumn(
+                  i,
+                  "width",
+                  v === "" ? undefined : Math.min(100, Math.max(1, +v))
+                );
+              }}
+            />
+
+            <AlignmentSelector
+              value={col.align}
+              name={`alignment-${i}`}
+              onChange={(align) => {
+                updateColumn(i, "align", align);
+              }}
+            />
+
+            <RadioSelector
+              title="Size"
+              onChange={(v) => {
+                updateColumn(i, "size", v);
+              }}
+              name={`size-${i}`}
+              selections={["xs", "sm", "base", "lg", "xl"]}
+              value={col.size}
+            />
+
+            <RadioSelector
+              title="Thickness"
+              onChange={(v) => {
+                updateColumn(i, "thickness", v);
+              }}
+              name={`thickness-${i}`}
+              selections={["normal", "bolder", "lighter"]}
+              value={col.thickness}
+            />
+
+            <CheckboxGroup
+              title="Styles"
+              selections={getColumnStyleKeys(i)}
+              names={getColumnStyleKeys(i).map((n) => `${n}-${i}`)}
+              data={getColumnStyle(i)} // Type assertion because data contains more than booleans, but we only read booleans here
+              onChange={(change) => {
+                handleStyleChange(i, change);
+              }}
+            />
           </div>
-
-          <TextInput
-            title={`Column ${i + 1} Content`}
-            name={`content-${i}`}
-            value={col.text}
-            placeholder="Column text content"
-            onChange={(content) => updateColumn(i, "text", content)}
-          />
-
-          <NumberInput
-            title={`Column ${i + 1} Width (optional)`}
-            name={`width-${i}`}
-            value={col.width}
-            placeholder="Flexible if empty"
-            min={1}
-            max={100}
-            onChange={(v) => {
-              updateColumn(
-                i,
-                "width",
-                v === "" ? undefined : Math.min(100, Math.max(1, +v))
-              );
-            }}
-          />
-
-          <AlignmentSelector
-            value={col.align}
-            name={`alignment-${i}`}
-            onChange={(align) => updateColumn(i, "align", align)}
-          />
-        </div>
-      ))}
+        );
+      })}
 
       <button
         type="button"

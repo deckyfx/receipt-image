@@ -6,7 +6,7 @@ export class ReceiptBuilder {
   constructor(private width: number = 320) {
     this.htmls.push(`<!DOCTYPE html><html><head><style>
       body { font-family: monospace; font-size: 12px; margin: 0px 0px 2px 0px; padding: 0px 0px 2px 0px; color: black; }
-      h1, h2, h3, h4, h5, h6 { padding: 0px; margin: 0px; }}
+      h1, h2, h3, h4, h5, h6 { padding: 0px; margin: 0px; }
       .center { text-align: center; }
       .right { text-align: right; }
       .left { text-align: left; }
@@ -30,16 +30,7 @@ export class ReceiptBuilder {
     const classes: string[] = [];
     classes.push("text-content");
     if (opts?.align) classes.push(opts.align);
-    if (opts?.thickness) {
-      switch (opts.thickness) {
-        case "bolder":
-          classes.push("bold");
-          break;
-        case "lighter":
-          classes.push("lighter");
-          break;
-      }
-    }
+    if (opts?.thickness) classes.push(opts?.thickness);
     if (opts?.italic) classes.push("italic");
     if (opts?.underline) classes.push("underline");
     if (opts?.size) classes.push(`text-${opts.size}`);
@@ -72,18 +63,59 @@ export class ReceiptBuilder {
     );
   }
 
-  addQRCode(data: string) {
-    const encoded = encodeURIComponent(data);
-    this.htmls.push(
-      `<div class="center"><img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encoded}"/></div>`
-    );
-  }
+  addSVG(svg: string, width: number = 100, alignment: Alignment = "center") {
+    // Regex to capture the <svg> tag and its attributes, including the style attribute if it exists
+    const svgTagRegex = /<svg\s*([^>]*?)>/;
+    const match = svg.match(svgTagRegex);
 
-  addBarcode(data: string) {
-    const encoded = encodeURIComponent(data);
-    this.htmls.push(
-      `<div class="center"><img src="https://barcode.tec-it.com/barcode.ashx?data=${encoded}&code=Code128&dpi=96"/></div>`
-    );
+    if (!match) {
+      console.warn("Could not find <svg> tag in the provided SVG string.");
+      return svg; // Return original if no svg tag found
+    }
+
+    const fullSvgTag = match[0]; // e.g., <svg width="178px" height="142px" ... style="..." >
+    let attributesString: string = match[1] || ""; // Initialize with the captured string, TypeScript knows it's definitely a string here
+
+    // 1. Remove existing width and height attributes
+    attributesString = attributesString.replace(/\s*width="[^"]*"/g, "");
+    attributesString = attributesString.replace(/\s*height="[^"]*"/g, "");
+
+    // 2. Extract or create the style attribute content
+    let currentStyleContent: string = ""; // Initialize with an empty string
+    const styleAttrRegex = /style="([^"]*)"/;
+    const styleMatch = attributesString.match(styleAttrRegex);
+
+    if (styleMatch) {
+      currentStyleContent = styleMatch[1] || ""; // TypeScript now knows styleMatch[1] exists if styleMatch is not null
+      // Remove the old style attribute from the attributesString
+      attributesString = attributesString.replace(styleAttrRegex, "");
+    }
+
+    // 3. Update or add max-width and height: auto to the style content
+    let newStyleContent = currentStyleContent; // No change needed here, as currentStyleContent is guaranteed to be a string
+
+    // Remove any existing max-width or height properties to ensure we don't duplicate
+    newStyleContent = newStyleContent.replace(/max-width:[^;]*;?/g, "");
+    newStyleContent = newStyleContent.replace(/height:[^;]*;?/g, "");
+
+    // Trim and add our new styles, ensuring no double semicolons or leading/trailing spaces
+    newStyleContent = newStyleContent.trim();
+    if (newStyleContent.length > 0 && !newStyleContent.endsWith(";")) {
+      newStyleContent += ";";
+    }
+    newStyleContent += ` max-width: ${width}%; height: auto;`;
+    newStyleContent = newStyleContent.trim(); // Trim again in case of leading space from semicolon
+
+    // 4. Construct the new style attribute
+    const newStyleAttribute = `style="${newStyleContent}"`;
+
+    // 5. Reassemble the SVG tag
+    const newSvgTag = `<svg ${attributesString.trim()} ${newStyleAttribute}>`;
+
+    // Replace the original SVG tag with the new one
+    svg = svg.replace(fullSvgTag, newSvgTag);
+
+    this.htmls.push(`<div class="${alignment}">${svg}</div>`);
   }
 
   addColumns(columns: PayloadByType<"columns">) {
@@ -99,6 +131,12 @@ export class ReceiptBuilder {
       } else {
         styleParts.push(`flex: 1`);
       }
+
+      if (col?.thickness) classes.push(col?.thickness);
+      if (col?.italic) classes.push("italic");
+      if (col?.underline) classes.push("underline");
+      if (col?.size) classes.push(`text-${col.size}`);
+
       const classes_text = classes.join(" ");
       const styles_text = styleParts.join("; ");
       const element = `<div style="${styles_text}" class="${classes_text}">${col.text}</div>`;

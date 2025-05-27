@@ -7,19 +7,26 @@ import AddButton from "./AddButton";
 import { useEditorStore } from "@react/store/useEditorStore";
 import type { Alignment, PayloadByType } from "@src/types";
 
+const DefaultForm: PayloadByType<"heading"> = {
+  text: "",
+  size: 1,
+  align: "left",
+};
+
 export default function HeadingForm() {
   const { addComponent } = useEditorStore();
 
   const [data, setData] = useState<PayloadByType<"heading">>({
-    text: "",
-    size: 1,
-    align: "left",
+    ...DefaultForm,
   });
 
   function onAdd() {
     addComponent({
       type: "heading",
       data,
+    });
+    setData({
+      ...DefaultForm,
     });
   }
 

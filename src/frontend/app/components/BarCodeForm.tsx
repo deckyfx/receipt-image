@@ -6,35 +6,26 @@ import TextInput from "./TextInput";
 import AddButton from "./AddButton";
 import type { Alignment, PayloadByType } from "@src/types";
 
-const DefaultColumn: PayloadByType<"image"> = {
-  src: "",
+const DefaultColumn: PayloadByType<"barcode"> = {
+  type: "CODE128",
+  content: "",
   width: 100,
   align: "left",
 };
 
-function isValidUrl(url: string) {
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === "http:" || parsed.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-export default function ImageForm() {
+export default function BarCodeForm() {
   const { addComponent } = useEditorStore();
 
-  const [data, setData] = useState<PayloadByType<"image">>({
+  const [data, setData] = useState<PayloadByType<"barcode">>({
     ...DefaultColumn,
   });
 
-  const isUrlValid = isValidUrl(data.src);
-  const canAdd = data.src.trim().length > 0 && isUrlValid;
+  const canAdd = data.content.trim().length > 0;
 
   function onAdd() {
     if (!canAdd) return;
     addComponent({
-      type: "image",
+      type: "barcode",
       data,
     });
     setData({
@@ -45,18 +36,15 @@ export default function ImageForm() {
   return (
     <div className="space-y-4">
       <TextInput
-        title="Image Source URL"
+        title="Bar Code Data"
         name="src"
-        value={data.src}
-        placeholder="Enter image URL"
-        onChange={(src) => setData({ ...data, src })}
+        value={data.content}
+        placeholder="Enter Bar Code Data"
+        onChange={(content) => setData({ ...data, content })}
       />
-      {!isUrlValid && data.src.trim() !== "" && (
-        <div className="text-sm text-red-600">Please enter a valid URL.</div>
-      )}
 
       <SliderSelector
-        value={data.width || 100}
+        value={data.width}
         onChange={(val) => setData({ ...data, width: val })}
         min={1}
         max={100}
@@ -71,7 +59,7 @@ export default function ImageForm() {
         onChange={(align) => setData({ ...data, align: align as Alignment })}
       />
 
-      <AddButton component="image" onAdd={onAdd} disabled={!canAdd} />
+      <AddButton component="barcode" onAdd={onAdd} disabled={!canAdd} />
     </div>
   );
 }

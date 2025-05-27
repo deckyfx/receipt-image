@@ -2,8 +2,10 @@ export type ComponentType =
   | "heading"
   | "text"
   | "divider"
+  | "columns"
   | "image"
-  | "columns";
+  | "qrcode"
+  | "barcode";
 
 export type Alignment = "left" | "right" | "center";
 
@@ -21,10 +23,8 @@ export type HeadingPayload = {
   align?: Alignment;
 };
 
-export type TextPayload = {
-  text?: string;
+export type TextPayload = Omit<HeadingPayload, "size"> & {
   size?: TextSize;
-  align?: Alignment;
   thickness?: TextThickness;
   italic?: boolean;
   underline?: boolean;
@@ -35,15 +35,46 @@ export type DividerPayload = {
   style?: DividerStyle;
 };
 
+export type ColumnPayload = {
+  width?: number;
+} & TextPayload;
+
 export type ImagePayload = {
   src: string;
   width?: number; // percentage 1-100
   align?: Alignment;
 };
 
-export type ColumnPayload = {
-  width?: number;
-} & TextPayload;
+export type QRCodePayload = Omit<ImagePayload, "src"> & {
+  content: string;
+};
+
+export type BarCodePayload = QRCodePayload & {
+  type: BarCodeType;
+};
+
+export type BarCodeType =
+  | "CODE128"
+  | "EAN"
+  | "EAN-13"
+  | "EAN-8"
+  | "EAN-5"
+  | "EAN-2"
+  | "UPC (A)"
+  | "UPC (E)"
+  | "CODE39"
+  | "ITF"
+  | "ITF"
+  | "ITF-14"
+  | "MSI"
+  | "MSI10"
+  | "MSI11"
+  | "MSI1010"
+  | "MSI1110"
+  | "Pharmacode"
+  | "Codabar";
+
+export type TextStyle = Pick<TextPayload, "italic" | "underline">;
 
 export type PayloadByType<T extends ComponentType> = T extends "heading"
   ? HeadingPayload
@@ -51,8 +82,12 @@ export type PayloadByType<T extends ComponentType> = T extends "heading"
   ? TextPayload
   : T extends "divider"
   ? DividerPayload
-  : T extends "image"
-  ? ImagePayload
   : T extends "columns"
   ? ColumnPayload[]
+  : T extends "image"
+  ? ImagePayload
+  : T extends "qrcode"
+  ? QRCodePayload
+  : T extends "barcode"
+  ? BarCodePayload
   : never;
