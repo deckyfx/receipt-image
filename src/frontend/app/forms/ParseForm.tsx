@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import AddButton from "./AddButton";
-import TextAreaInput from "./TextAreaInput";
-import { isBatchParsePayloadItemArray } from "./ParseFormValidator";
+import AddButton from "@react/components/AddButton";
+import TextAreaInput from "@react/components/TextAreaInput";
+import FileUploadButton from "@react/components/FileUploadButton";
+import WarningBox from "@react/components/WarningBox";
+import { isBatchParsePayloadItemArray } from "@react/components/ParseFormValidator";
 
 import { useEditorStore } from "@react/store/useEditorStore";
 import type { BatchParsePayloadItem } from "@src/types";
@@ -72,8 +74,14 @@ export default function ParseForm() {
 
   return (
     <div className="space-y-4">
+      <FileUploadButton
+        title="Batch Component JSON Data"
+        onFileContent={setJsonInput}
+        onError={setParseError}
+      />
+
       <TextAreaInput
-        title="Batch Component JSON Data" // Changed title for clarity
+        title=""
         name="batchComponentData"
         value={jsonInput}
         placeholder={`Enter component data as JSON Array, example:\n[\n {"type": "heading", "text": "Heading Text"},\n {"type": "text", "text": "Hello World"}\n]`}
@@ -82,13 +90,7 @@ export default function ParseForm() {
       />
 
       {parseError && (
-        <div
-          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-          role="alert"
-        >
-          <strong className="font-bold">Validation Error:</strong>
-          <span className="block sm:inline"> {parseError}</span>
-        </div>
+        <WarningBox title="Validation Error" message={parseError} />
       )}
 
       {/* The Add button now adds multiple components */}

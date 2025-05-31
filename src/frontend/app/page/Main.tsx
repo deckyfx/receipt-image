@@ -1,5 +1,5 @@
-import ControlPanel from "./ControlPanel";
-import PreviewPanel from "./PreviewPanel";
+import ControlPanel from "@react/page/ControlPanel";
+import PreviewPanel from "@react/page/PreviewPanel";
 
 export default function Main() {
   return (

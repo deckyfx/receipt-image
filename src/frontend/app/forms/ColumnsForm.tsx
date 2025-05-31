@@ -1,13 +1,14 @@
 import { useState } from "react";
-import TextInput from "./TextInput";
-import AlignmentSelector from "./AlignmentSelector";
-import AddButton from "./AddButton";
-import NumberInput from "./NumberInput";
-import CheckboxGroup from "./CheckboxGroup";
-import RadioSelector from "./RadioSelector";
+import TextInput from "@react/components/TextInput";
+import AlignmentSelector from "@react/components/AlignmentSelector";
+import AddButton from "@react/components/AddButton";
+import NumberInput from "@react/components/NumberInput";
+import CheckboxGroup from "@react/components/CheckboxGroup";
+import RadioSelector from "@react/components/RadioSelector";
 
 import { useEditorStore } from "@react/store/useEditorStore";
 import type { ColumnPayload, TextPayload, TextStyle } from "@src/types";
+import { TEXT_SIZES, TEXT_THICKNESSES } from "@src/types";
 
 const COLUMNS_MIN = 2;
 const COLUMNS_MAX = 3;
@@ -141,7 +142,7 @@ export default function ColumnsForm() {
                 updateColumn(i, "size", v);
               }}
               name={`size-${i}`}
-              selections={["xs", "sm", "base", "lg", "xl"]}
+              selections={TEXT_SIZES}
               value={col.size}
             />
 
@@ -151,7 +152,7 @@ export default function ColumnsForm() {
                 updateColumn(i, "thickness", v);
               }}
               name={`thickness-${i}`}
-              selections={["normal", "bolder", "lighter"]}
+              selections={TEXT_THICKNESSES}
               value={col.thickness}
             />
 
@@ -172,9 +173,10 @@ export default function ColumnsForm() {
         type="button"
         onClick={addColumn}
         disabled={columns.length >= COLUMNS_MAX}
-        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400"
+        className="w-full py-2 rounded bg-green-600 text-white flex items-center justify-center gap-2 rounded hover:bg-green-700 disabled:bg-gray-400"
       >
-        Add Column
+        <span className="material-icons text-xl">add</span>
+        {`Add 3rd Column`.toLocaleUpperCase()}
       </button>
 
       <AddButton component="columns" onAdd={onAdd} disabled={!canAdd} />

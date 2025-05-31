@@ -1,12 +1,13 @@
 import { useState } from "react";
 
-import AlignmentSelector from "./AlignmentSelector";
-import AddButton from "./AddButton";
-import RadioSelector from "./RadioSelector";
-import CheckboxGroup from "./CheckboxGroup";
-import TextInput from "./TextInput";
+import AlignmentSelector from "@react/components/AlignmentSelector";
+import AddButton from "@react/components/AddButton";
+import RadioSelector from "@react/components/RadioSelector";
+import CheckboxGroup from "@react/components/CheckboxGroup";
+import TextInput from "@react/components/TextInput";
 import { useEditorStore } from "@react/store/useEditorStore";
 import type { Alignment, PayloadByType, TextStyle } from "@src/types";
+import { TEXT_SIZES, TEXT_THICKNESSES } from "@src/types";
 
 const DefaultForm: PayloadByType<"text"> = {
   text: "",
@@ -76,7 +77,7 @@ export default function TextForm() {
           });
         }}
         name="size"
-        selections={["xs", "sm", "base", "lg", "xl"]}
+        selections={TEXT_SIZES}
         value={data.size}
       />
 
@@ -89,7 +90,7 @@ export default function TextForm() {
           });
         }}
         name="thickness"
-        selections={["normal", "bolder", "lighter"]}
+        selections={TEXT_THICKNESSES}
         value={data.thickness}
       />
 

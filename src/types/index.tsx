@@ -1,21 +1,31 @@
-export type ComponentType =
-  | "heading"
-  | "text"
-  | "divider"
-  | "columns"
-  | "image"
-  | "qrcode"
-  | "barcode";
+// Constants for string literal types
+export const COMPONENT_TYPES = [
+  "heading",
+  "text",
+  "divider",
+  "columns",
+  "image",
+  "qrcode",
+  "barcode"
+] as const;
 
-export type Alignment = "left" | "right" | "center";
+export const ALIGNMENTS = ["left", "center", "right"] as const;
 
-export type TextThickness = "normal" | "bolder" | "lighter";
+export const TEXT_THICKNESSES = ["normal", "bolder", "lighter"] as const;
 
-export type TextSize = "xs" | "sm" | "base" | "lg" | "xl";
+export const TEXT_SIZES = ["xs", "sm", "base", "lg", "xl"] as const;
 
-export type DividerThickness = "medium" | "thick" | "thin";
+export const DIVIDER_THICKNESSES = ["thin", "medium", "thick"] as const;
 
-export type DividerStyle = "solid" | "dashed" | "dotted" | "double";
+export const DIVIDER_STYLES = ["solid", "dashed", "dotted", "double"] as const;
+
+// Types inferred from constants
+export type ComponentType = typeof COMPONENT_TYPES[number];
+export type Alignment = typeof ALIGNMENTS[number];
+export type TextThickness = typeof TEXT_THICKNESSES[number];
+export type TextSize = typeof TEXT_SIZES[number];
+export type DividerThickness = typeof DIVIDER_THICKNESSES[number];
+export type DividerStyle = typeof DIVIDER_STYLES[number];
 
 export type HeadingPayload = {
   text?: string;
@@ -50,29 +60,31 @@ export type QRCodePayload = Omit<ImagePayload, "src"> & {
 };
 
 export type BarCodePayload = QRCodePayload & {
-  type: BarCodeType;
+  barcode_type: BarCodeType;
 };
 
-export type BarCodeType =
-  | "CODE128"
-  | "EAN"
-  | "EAN-13"
-  | "EAN-8"
-  | "EAN-5"
-  | "EAN-2"
-  | "UPC (A)"
-  | "UPC (E)"
-  | "CODE39"
-  | "ITF"
-  | "ITF"
-  | "ITF-14"
-  | "MSI"
-  | "MSI10"
-  | "MSI11"
-  | "MSI1010"
-  | "MSI1110"
-  | "Pharmacode"
-  | "Codabar";
+export const BARCODE_TYPES = [
+  "CODE128",
+  "EAN",
+  "EAN-13",
+  "EAN-8",
+  "EAN-5",
+  "EAN-2",
+  "UPC (A)",
+  "UPC (E)",
+  "CODE39",
+  "ITF",
+  "ITF-14",
+  "MSI",
+  "MSI10",
+  "MSI11",
+  "MSI1010",
+  "MSI1110",
+  "Pharmacode",
+  "Codabar"
+] as const;
+
+export type BarCodeType = typeof BARCODE_TYPES[number];
 
 export type TextStyle = Pick<TextPayload, "italic" | "underline">;
 

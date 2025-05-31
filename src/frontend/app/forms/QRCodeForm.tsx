@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useEditorStore } from "../store/useEditorStore";
-import AlignmentSelector from "./AlignmentSelector";
-import SliderSelector from "./SliderSelector";
-import TextInput from "./TextInput";
-import AddButton from "./AddButton";
+import { useEditorStore } from "@react/store/useEditorStore";
+import AlignmentSelector from "@react/components/AlignmentSelector";
+import SliderSelector from "@react/components/SliderSelector";
+import TextInput from "@react/components/TextInput";
+import AddButton from "@react/components/AddButton";
 import type { Alignment, PayloadByType } from "@src/types";
 
 const DefaultColumn: PayloadByType<"qrcode"> = {

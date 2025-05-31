@@ -1,9 +1,9 @@
 import { useState } from "react";
 
-import AlignmentSelector from "./AlignmentSelector";
-import SliderSelector from "./SliderSelector";
-import TextInput from "./TextInput";
-import AddButton from "./AddButton";
+import AlignmentSelector from "@react/components/AlignmentSelector";
+import SliderSelector from "@react/components/SliderSelector";
+import TextInput from "@react/components/TextInput";
+import AddButton from "@react/components/AddButton";
 import { useEditorStore } from "@react/store/useEditorStore";
 import type { Alignment, PayloadByType } from "@src/types";
 

@@ -1,4 +1,4 @@
-import { type Alignment } from "@src/types";
+import { type Alignment, ALIGNMENTS } from "@src/types";
 import RadioSelector from "./RadioSelector";
 
 type Props = {
@@ -13,7 +13,7 @@ export default function AlignmentSelector({ name, value, onChange }: Props) {
       title="Alignment"
       onChange={onChange}
       name={name || "alignment"}
-      selections={["left", "center", "right"]}
+      selections={ALIGNMENTS}
       value={value || "left"}
     />
   );

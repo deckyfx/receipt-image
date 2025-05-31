@@ -29,4 +29,4 @@ Bun.serve({
     return new Response("Not Found", { status: 404 });
   },
 });
-console.log("Server running at 3000");
+console.log(`Server running at ${PORT}`);

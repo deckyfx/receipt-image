@@ -6,9 +6,12 @@ import { DOMImplementation, XMLSerializer } from "xmldom";
 
 import { ReceiptBuilder } from "./ReceiptBuilder";
 
-import { type BatchParsePayloadItem, type PayloadByType } from "./types";
+import { type BatchParsePayloadItem } from "./types";
 
-export default async function ImageGenerator(width: number, payload: BatchParsePayloadItem) {
+export default async function ImageGenerator(
+  width: number,
+  payload: BatchParsePayloadItem
+): Promise<string> {
   const browser = await puppeteer.launch({});
   const page = await browser.newPage();
   await page.setViewport({
@@ -16,37 +19,38 @@ export default async function ImageGenerator(width: number, payload: BatchParseP
     height: 1,
     deviceScaleFactor: 1,
   });
+
   const receipt = new ReceiptBuilder();
   let html = "";
 
   switch (payload.type) {
     case "text": {
-      const { text, ...data } = payload as PayloadByType<"text">;
+      const { text, type, ...data } = payload;
       receipt.addText(text || "", data);
       break;
     }
     case "heading": {
-      const { text, ...data } = payload as PayloadByType<"heading">;
+      const { text, type, ...data } = payload;
       receipt.addHeading(text || "", data);
       break;
     }
     case "divider": {
-      const data = payload as PayloadByType<"divider">;
+      const { type, ...data } = payload;
       receipt.addDivider(data);
       break;
     }
     case "columns": {
-      const data = payload.data as PayloadByType<"columns">;
+      const { data } = payload;
       receipt.addColumns(data);
       break;
     }
     case "image": {
-      const { src, width, align } = payload as PayloadByType<"image">;
+      const { src, width, align } = payload;
       receipt.addImage(src, width, align);
       break;
     }
     case "qrcode": {
-      const { content, width, align } = payload as PayloadByType<"qrcode">;
+      const { content, width, align } = payload;
 
       try {
         const qrdata = await qrcode.toDataURL(content);
@@ -58,7 +62,7 @@ export default async function ImageGenerator(width: number, payload: BatchParseP
       break;
     }
     case "barcode": {
-      const { content, width, align } = payload as PayloadByType<"barcode">;
+      const { content, width, align, barcode_type } = payload;
 
       const xmlSerializer = new XMLSerializer();
       const document = new DOMImplementation().createDocument(
@@ -73,11 +77,18 @@ export default async function ImageGenerator(width: number, payload: BatchParseP
 
       JsBarcode(svgNode, content, {
         xmlDocument: document,
+        format: barcode_type,
       });
 
       const svgText = xmlSerializer.serializeToString(svgNode);
       receipt.addSVG(svgText, width, align);
       break;
+    }
+    default: {
+      const _exhaustive: never = payload;
+      throw new Error(
+        `Unhandled component type: ${JSON.stringify(_exhaustive)}`
+      );
     }
   }
   html = receipt.build();
@@ -90,6 +101,8 @@ export default async function ImageGenerator(width: number, payload: BatchParseP
     type: "png",
     //path: "./images/result.png",
   });
+
+  await browser.close();
 
   return base64;
 }

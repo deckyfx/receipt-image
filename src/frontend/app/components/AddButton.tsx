@@ -13,7 +13,7 @@ export default function AddButton({ component, disabled, onAdd }: Props) {
       disabled={disabled}
       className={`
         w-full py-2 rounded
-        text-white
+        text-white flex items-center justify-center gap-2
         ${
           disabled
             ? "bg-gray-400 cursor-not-allowed"
@@ -21,6 +21,7 @@ export default function AddButton({ component, disabled, onAdd }: Props) {
         }
       `}
     >
+      <span className="material-icons text-xl">add</span>
       {`ADD ${component?.toLocaleUpperCase()}`}
     </button>
   );

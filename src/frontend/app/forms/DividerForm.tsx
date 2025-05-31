@@ -1,9 +1,10 @@
 import { useState } from "react";
 
-import AddButton from "./AddButton";
-import RadioSelector from "./RadioSelector";
+import AddButton from "@react/components/AddButton";
+import RadioSelector from "@react/components/RadioSelector";
 import { useEditorStore } from "@react/store/useEditorStore";
 import type { PayloadByType } from "@src/types";
+import { DIVIDER_THICKNESSES, DIVIDER_STYLES } from "@src/types";
 
 const DefaultForm: PayloadByType<"divider"> = {
   thickness: "thin",
@@ -38,7 +39,7 @@ export function DividerForm() {
           });
         }}
         name="thickness"
-        selections={["medium", "thick", "thin"]}
+        selections={DIVIDER_THICKNESSES}
         value={data.thickness}
       />
 
@@ -51,7 +52,7 @@ export function DividerForm() {
           });
         }}
         name="style"
-        selections={["solid", "dashed", "dotted", "double"]}
+        selections={DIVIDER_STYLES}
         value={data.style}
       />
 

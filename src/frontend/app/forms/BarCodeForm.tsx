@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { useEditorStore } from "../store/useEditorStore";
-import AlignmentSelector from "./AlignmentSelector";
-import SliderSelector from "./SliderSelector";
-import TextInput from "./TextInput";
-import AddButton from "./AddButton";
-import type { Alignment, PayloadByType } from "@src/types";
+import { useEditorStore } from "@react/store/useEditorStore";
+import AlignmentSelector from "@react/components/AlignmentSelector";
+import SliderSelector from "@react/components/SliderSelector";
+import TextInput from "@react/components/TextInput";
+import AddButton from "@react/components/AddButton";
+import DropdownSelector from "@react/components/DropdownSelector";
+import { BARCODE_TYPES } from "@src/types";
+import type { Alignment, PayloadByType, BarCodeType } from "@src/types";
 
 const DefaultColumn: PayloadByType<"barcode"> = {
-  type: "CODE128",
+  barcode_type: "CODE128",
   content: "",
   width: 100,
   align: "left",
@@ -43,8 +45,16 @@ export default function BarCodeForm() {
         onChange={(content) => setData({ ...data, content })}
       />
 
+      <DropdownSelector
+        title="Barcode Type"
+        name="barcode_type"
+        selections={BARCODE_TYPES}
+        value={data.barcode_type}
+        onChange={(type) => setData({ ...data, barcode_type: type as BarCodeType })}
+      />
+
       <SliderSelector
-        value={data.width}
+        value={data.width || 100}
         onChange={(val) => setData({ ...data, width: val })}
         min={1}
         max={100}
