@@ -1,5 +1,6 @@
 import frontend from "./frontend/index.html";
 import GenerateRoute from "./GenerateRoute";
+import ParseRoute from "./ParseRoute";
 
 const PORT = process.env.PORT || 3000;
 
@@ -18,7 +19,8 @@ Bun.serve({
   // `routes` requires Bun v1.2.3+
   routes: {
     "/": frontend,
-    "/api/generate": GenerateRoute
+    "/api/generate": GenerateRoute,
+    "/api/parse": ParseRoute,
   },
 
   // (optional) fallback for unmatched routes:

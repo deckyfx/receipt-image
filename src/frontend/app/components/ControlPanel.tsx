@@ -8,11 +8,12 @@ import ColumnsForm from "./ColumnsForm";
 import ImageForm from "./ImageForm";
 import QRCodeForm from "./QRCodeForm";
 import BarCodeForm from "./BarCodeForm";
+import ParseForm from "./ParseForm";
 
 import type { ComponentType } from "@src/types";
 import { useEditorStore } from "@react/store/useEditorStore";
 
-const formMap: Record<ComponentType, any> = {
+const formMap: Record<ComponentType | "parse", any> = {
   heading: HeadingForm,
   text: TextForm,
   divider: DividerForm,
@@ -20,6 +21,7 @@ const formMap: Record<ComponentType, any> = {
   image: ImageForm,
   qrcode: QRCodeForm,
   barcode: BarCodeForm,
+  parse: ParseForm,
 };
 
 export default function ControlPanel() {
@@ -52,6 +54,7 @@ export default function ControlPanel() {
           "image",
           "qrcode",
           "barcode",
+          "parse",
         ]}
         value={selected || ""}
       />

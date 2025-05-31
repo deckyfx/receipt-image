@@ -126,7 +126,7 @@ export class ReceiptBuilder {
 
       const styleParts = [];
       if (col.width) {
-        const flex_style = ["0", "0", col.width];
+        const flex_style = ["0", "0", `${col.width}%`];
         styleParts.push(`flex: ${flex_style.join(" ")}`);
       } else {
         styleParts.push(`flex: 1`);

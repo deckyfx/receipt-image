@@ -1,7 +1,7 @@
 import type { ComponentType } from "@src/types";
 
 type Props = {
-  component?: ComponentType;
+  component?: ComponentType | "parse";
   disabled?: boolean;
   onAdd?: () => void;
 };

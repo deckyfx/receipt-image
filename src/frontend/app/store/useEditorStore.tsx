@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import type { ComponentType } from "@src/types";
+import type { BatchParsePayloadItem, ComponentType } from "@src/types";
 
 type ElementData = {
   type: ComponentType;
@@ -16,6 +16,7 @@ type EditorStore = {
   addImage: (base64: string) => void;
   removeImage: (index: number) => void;
   addComponent: (element: ElementData) => Promise<void>;
+  parseBatch: (elements: BatchParsePayloadItem[]) => Promise<void>;
 };
 
 export const useEditorStore = create<EditorStore>((set, get) => ({
@@ -35,7 +36,18 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type, data, width: get().width }),
     });
-    const { image } = await res.json();
+    const { image } = (await res.json()) as { image: string };
     get().addImage(image);
+  },
+  parseBatch: async (data) => {
+    const res = await fetch("/api/parse", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ width: get().width, data }),
+    });
+    const images = (await res.json()) as string[];
+    images.forEach((image) => {
+      get().addImage(image);
+    });
   },
 }));

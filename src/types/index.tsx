@@ -91,3 +91,27 @@ export type PayloadByType<T extends ComponentType> = T extends "heading"
   : T extends "barcode"
   ? BarCodePayload
   : never;
+
+export type GeneratePayload = {
+  type: ComponentType;
+  data: unknown;
+  width: number;
+};
+
+// No more PayloadByType helper needed for this structure
+
+// This is the new, merged/flat structure for a single component item
+export type BatchParsePayloadItem =
+  | ({ type: "heading" } & HeadingPayload) // Merges HeadingPayload properties directly
+  | ({ type: "text" } & TextPayload)
+  | ({ type: "divider" } & DividerPayload)
+  | { type: "columns"; data: ColumnPayload[] } // Special handling for columns if it's an array
+  | ({ type: "image" } & ImagePayload)
+  | ({ type: "qrcode" } & QRCodePayload)
+  | ({ type: "barcode" } & BarCodePayload);
+
+// Your BatchParsePayload would then use this new type
+export type BatchParsePayload = {
+  width: number;
+  data: BatchParsePayloadItem[];
+};

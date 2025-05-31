@@ -6,51 +6,47 @@ import { DOMImplementation, XMLSerializer } from "xmldom";
 
 import { ReceiptBuilder } from "./ReceiptBuilder";
 
-import { type GeneratePayload, type PayloadByType } from "./types";
+import { type BatchParsePayloadItem, type PayloadByType } from "./types";
 
-async function Generate(
-  req: Bun.BunRequest<"/api/generate">
-): Promise<Response> {
-  const body = (await req.json()) as GeneratePayload;
-
+export default async function ImageGenerator(width: number, payload: BatchParsePayloadItem) {
   const browser = await puppeteer.launch({});
   const page = await browser.newPage();
   await page.setViewport({
-    width: body.width,
+    width: width,
     height: 1,
     deviceScaleFactor: 1,
   });
   const receipt = new ReceiptBuilder();
   let html = "";
 
-  switch (body.type) {
+  switch (payload.type) {
     case "text": {
-      const { text, ...payload } = body.data as PayloadByType<"text">;
-      receipt.addText(text || "", payload);
+      const { text, ...data } = payload as PayloadByType<"text">;
+      receipt.addText(text || "", data);
       break;
     }
     case "heading": {
-      const { text, ...payload } = body.data as PayloadByType<"heading">;
-      receipt.addHeading(text || "", payload);
+      const { text, ...data } = payload as PayloadByType<"heading">;
+      receipt.addHeading(text || "", data);
       break;
     }
     case "divider": {
-      const payload = body.data as PayloadByType<"divider">;
-      receipt.addDivider(payload);
+      const data = payload as PayloadByType<"divider">;
+      receipt.addDivider(data);
       break;
     }
     case "columns": {
-      const payload = body.data as PayloadByType<"columns">;
-      receipt.addColumns(payload);
+      const data = payload.data as PayloadByType<"columns">;
+      receipt.addColumns(data);
       break;
     }
     case "image": {
-      const { src, width, align } = body.data as PayloadByType<"image">;
+      const { src, width, align } = payload as PayloadByType<"image">;
       receipt.addImage(src, width, align);
       break;
     }
     case "qrcode": {
-      const { content, width, align } = body.data as PayloadByType<"qrcode">;
+      const { content, width, align } = payload as PayloadByType<"qrcode">;
 
       try {
         const qrdata = await qrcode.toDataURL(content);
@@ -62,7 +58,7 @@ async function Generate(
       break;
     }
     case "barcode": {
-      const { content, width, align } = body.data as PayloadByType<"barcode">;
+      const { content, width, align } = payload as PayloadByType<"barcode">;
 
       const xmlSerializer = new XMLSerializer();
       const document = new DOMImplementation().createDocument(
@@ -86,8 +82,6 @@ async function Generate(
   }
   html = receipt.build();
 
-  console.log(html);
-
   await page.setContent(html);
 
   const base64 = await page.screenshot({
@@ -97,9 +91,5 @@ async function Generate(
     //path: "./images/result.png",
   });
 
-  return Response.json({ status: "ok", image: base64 });
+  return base64;
 }
-
-export default {
-  POST: Generate,
-} as const;

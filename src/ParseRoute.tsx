@@ -6,12 +6,10 @@ import { DOMImplementation, XMLSerializer } from "xmldom";
 
 import { ReceiptBuilder } from "./ReceiptBuilder";
 
-import { type GeneratePayload, type PayloadByType } from "./types";
+import type { BatchParsePayload, PayloadByType } from "./types";
 
-async function Generate(
-  req: Bun.BunRequest<"/api/generate">
-): Promise<Response> {
-  const body = (await req.json()) as GeneratePayload;
+async function Parse(req: Bun.BunRequest<"/api/parse">): Promise<Response> {
+  const body = (await req.json()) as BatchParsePayload;
 
   const browser = await puppeteer.launch({});
   const page = await browser.newPage();
@@ -31,6 +29,7 @@ async function Generate(
     }
     case "heading": {
       const { text, ...payload } = body.data as PayloadByType<"heading">;
+      const size = body.data.size;
       receipt.addHeading(text || "", payload);
       break;
     }
@@ -86,8 +85,6 @@ async function Generate(
   }
   html = receipt.build();
 
-  console.log(html);
-
   await page.setContent(html);
 
   const base64 = await page.screenshot({
@@ -101,5 +98,5 @@ async function Generate(
 }
 
 export default {
-  POST: Generate,
+  POST: Parse,
 } as const;
