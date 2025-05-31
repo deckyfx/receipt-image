@@ -1,1 +1,1 @@
-This is the frontend React side,
+This is the frontend React side.

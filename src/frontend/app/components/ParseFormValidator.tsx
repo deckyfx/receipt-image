@@ -1,3 +1,12 @@
+/**
+ * @fileoverview ParseFormValidator - Comprehensive validation utilities for receipt component data.
+ * Provides type guards and validation functions for all receipt component types and batch parsing.
+ * 
+ * @author Receipt Image Generator
+ * @since 2024-12-31
+ * @changelog 2024-12-31: Added comprehensive TSDoc documentation and inline comments (Documentation Enhancement)
+ */
+
 import { 
   ALIGNMENTS,
   TEXT_SIZES,
@@ -8,6 +17,10 @@ import {
   COMPONENT_TYPES
 } from "@src/types/index";
 
+/**
+ * Collection of common validation utilities used across all component validators.
+ * These validators provide consistent error messaging and type checking.
+ */
 // Common validators
 const validators = {
   required: (value: any, fieldName: string): string => {
@@ -75,8 +88,16 @@ const validators = {
   }
 };
 
-// Element validators now use imported constants
+/**
+ * Individual component validation functions that validate specific receipt element types.
+ * Each function returns an empty string for valid data or an error message for invalid data.
+ */
 
+/**
+ * Validates heading element data structure and values.
+ * @param data - The heading element data to validate
+ * @returns Empty string if valid, error message if invalid
+ */
 function checkHeadingElementError(data: any): string {
   // Required fields
   const textError = validators.required(data.text, "Heading text");
@@ -99,6 +120,11 @@ function checkHeadingElementError(data: any): string {
   return "";
 }
 
+/**
+ * Validates text element data structure and values.
+ * @param data - The text element data to validate
+ * @returns Empty string if valid, error message if invalid
+ */
 function checkTextElementError(data: any): string {
   // Optional text field (can be empty string)
   if (data.text !== undefined) {
@@ -135,6 +161,11 @@ function checkTextElementError(data: any): string {
   return "";
 }
 
+/**
+ * Validates divider element data structure and values.
+ * @param data - The divider element data to validate
+ * @returns Empty string if valid, error message if invalid
+ */
 function checkDividerElementError(data: any): string {
   // All fields are optional
   if (data.thickness !== undefined) {
@@ -150,6 +181,12 @@ function checkDividerElementError(data: any): string {
   return "";
 }
 
+/**
+ * Validates individual column data within a columns element.
+ * @param column - The column data to validate
+ * @param index - The column index (for error messaging)
+ * @returns Empty string if valid, error message if invalid
+ */
 function checkColumnElementError(column: any, index: number): string {
   // Check text properties (columns inherit from TextPayload)
   const textError = checkTextElementError(column);
@@ -164,6 +201,11 @@ function checkColumnElementError(column: any, index: number): string {
   return "";
 }
 
+/**
+ * Validates columns element data structure and all contained columns.
+ * @param data - The columns element data to validate
+ * @returns Empty string if valid, error message if invalid
+ */
 function checkColumnsElementError(data: any): string {
   // Columns must have a data array
   const arrayError = validators.required(data.data, "Columns data");
@@ -185,6 +227,11 @@ function checkColumnsElementError(data: any): string {
   return "";
 }
 
+/**
+ * Validates image element data structure and values.
+ * @param data - The image element data to validate
+ * @returns Empty string if valid, error message if invalid
+ */
 function checkImageElementError(data: any): string {
   // Required fields
   const srcError = validators.required(data.src, "Image src");
@@ -207,6 +254,11 @@ function checkImageElementError(data: any): string {
   return "";
 }
 
+/**
+ * Validates QR code element data structure and values.
+ * @param data - The QR code element data to validate
+ * @returns Empty string if valid, error message if invalid
+ */
 function checkQRCodeElementError(data: any): string {
   // Required fields
   const contentError = validators.required(data.content, "QR code content");
@@ -229,6 +281,11 @@ function checkQRCodeElementError(data: any): string {
   return "";
 }
 
+/**
+ * Validates barcode element data structure and values.
+ * @param data - The barcode element data to validate
+ * @returns Empty string if valid, error message if invalid
+ */
 function checkBarCodeElementError(data: any): string {
   // Required fields
   const contentError = validators.required(data.content, "Barcode content");
@@ -257,8 +314,30 @@ function checkBarCodeElementError(data: any): string {
   return "";
 }
 
-// --- Type Guard for BatchParsePayloadItem ---
-// This function checks if an unknown value conforms to the BatchParsePayloadItem structure.
+/**
+ * Type guard function that validates if an unknown value conforms to BatchParsePayloadItem structure.
+ * 
+ * This function performs discriminated union validation based on the 'type' property,
+ * then delegates to specific validators for each component type.
+ * 
+ * @param item - The unknown item to validate
+ * @returns Empty string if valid, error message describing the validation failure
+ * 
+ * @example
+ * ```tsx
+ * const result = isBatchParsePayloadItem({
+ *   type: 'text',
+ *   text: 'Hello World',
+ *   align: 'center'
+ * });
+ * 
+ * if (result) {
+ *   console.error('Validation failed:', result);
+ * } else {
+ *   console.log('Item is valid');
+ * }
+ * ```
+ */
 export function isBatchParsePayloadItem(item: any): string {
   if (typeof item !== "object" || item === null || !("type" in item)) {
     return "Each item must be an object with a 'type' property";
@@ -270,7 +349,7 @@ export function isBatchParsePayloadItem(item: any): string {
     return `Invalid type '${type}'. Must be one of: ${COMPONENT_TYPES.join(", ")}`;
   }
 
-  // Perform specific checks based on the 'type' discriminator
+  // Use discriminated union pattern - validate based on component type
   switch (type) {
     case "heading":
       return checkHeadingElementError(item);
@@ -291,7 +370,27 @@ export function isBatchParsePayloadItem(item: any): string {
   }
 }
 
-// --- Type Guard for BatchParsePayloadItem[] (Array of BatchParsePayloadItem) ---
+/**
+ * Type guard function that validates an array of BatchParsePayloadItem objects.
+ * 
+ * This function ensures the input is an array, contains at least one element,
+ * and that every element in the array is a valid BatchParsePayloadItem.
+ * 
+ * @param values - The unknown value to validate as an array
+ * @returns Empty string if valid, error message describing the validation failure
+ * 
+ * @example
+ * ```tsx
+ * const jsonData = JSON.parse(fileContent);
+ * const validationError = isBatchParsePayloadItemArray(jsonData);
+ * 
+ * if (validationError) {
+ *   setError(`Invalid data: ${validationError}`);
+ * } else {
+ *   processValidData(jsonData);
+ * }
+ * ```
+ */
 export function isBatchParsePayloadItemArray(values: any): string {
   if (!Array.isArray(values)) {
     return "The JSON must be an array of receipt elements";
@@ -301,11 +400,11 @@ export function isBatchParsePayloadItemArray(values: any): string {
     return "The array must contain at least one element";
   }
   
-  // Check if every item in the array is a valid BatchParsePayloadItem
+  // Validate each item in the array using individual validator
   for (let i = 0; i < values.length; i++) {
     const error = isBatchParsePayloadItem(values[i]);
     if (error) {
-      return `Element ${i + 1}: ${error}`;
+      return `Element ${i + 1}: ${error}`;  // Include element position in error
     }
   }
   
