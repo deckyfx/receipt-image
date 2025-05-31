@@ -4,7 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun run --hot ./src/index.ts"
+    "dev": "bun run --hot ./src/index.ts",
+    "vitest": "vitest run",
+    "report": "bunx vite preview --outDir vitest-report --host 0.0.0.0"
   },
   "engines": {
     "bun": ">= 1.2.15"
@@ -26,7 +28,11 @@
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.5",
-    "@types/xmldom": "^0.1.34"
+    "@types/xmldom": "^0.1.34",
+    "@vitest/ui": "^3.1.4",
+    "vitest": "^3.1.4",
+    "vitest-environment-puppeteer": "^11.0.3",
+    "vitest-puppeteer": "^11.0.3"
   },
   "peerDependencies": {
     "typescript": "^5.8.3"
